@@ -1,0 +1,361 @@
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    background-color: #0f172a;
+    height: 100vh;
+    width: 100vw;  
+}
+
+#blob {
+    height: 700px;
+    aspect-ratio: 1;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+
+    border-radius: 50%;
+    background: #1a2c5c;
+    animation: rotate 20s infinite;
+    
+}
+
+#blur {
+    height: 100%;
+    width: 100%;
+    position: fixed;
+    z-index: 2;
+    backdrop-filter: blur(200px); /* Reduced the blur value for a more subtle effect */
+}
+
+.main {
+    position: absolute;
+    height: 100vh;
+    width: 76vw;
+    /* border: 2px solid red; */
+    z-index: 3;
+    margin: 0 12vw 0 12vw;
+    box-sizing: border-box;
+    display:flex;
+}
+
+.header {
+    position: fixed;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* Ensures the header spans the full height of the viewport */
+    left: 17.8%;
+    width: 41%; 
+    z-index: 3; /* This ensures the header stays above other content */
+    padding: 40px 0 66px 0;
+    overflow: hidden; /* Prevents any overflow content from being visible */
+}
+
+
+.header h1 {
+    position: relative;
+    font-size: 48px;
+    font-weight: 700;
+    top: 0px;
+    position: relative;
+    font-family: sans-serif;
+    letter-spacing: -1.2px;
+    line-height: 48px;
+    word-spacing: none;
+    color: #E2E8F0; /* Adjust the color as needed */
+}
+
+.header h2 {
+    font-size: 20px;
+    top: -32px;
+    position: relative; 
+    font-family: 'Applied Sans Pro';
+    font-weight: 500;
+    line-height: 20px;
+    color: #E2E8F0;
+}
+
+.header h3 {
+    font-size: 15px;
+    top: -30px;
+    position: relative; 
+    font-family: 'Applied Sans Pro';
+    font-weight: 500;
+    line-height: 20px;
+    color: #94a3b8;
+}
+
+/* Shared styles for all menu items */
+.header .menu-item {
+    background-image: linear-gradient(
+        to right,
+        #54b3d6,
+        #54b3d6 50%,
+        #e2e8f0 50%
+    );
+    position: relative;
+    font-size: 12px;
+    font-weight: 700;
+    top: 60px;
+    font-family: 'Applied Sans Pro';
+    letter-spacing: 1.2px;
+    background-size: 200% 100%;
+    background-position: -100%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    transition: all 0.3s ease-in-out;
+    margin-bottom: 39px; /* Gap between items */
+    display: block; /* Display items inline */
+}
+
+.header .menu-item:before {
+    content: '';
+    background: #54b3d6;
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    transition: all 0.3s ease-in-out;
+}
+
+.header .menu-item:hover {
+    background-position: 0;
+}
+
+.header .menu-item:hover::before {
+    width: 75%;
+}
+
+/* Remove margin from the last item */
+.header .menu-item:last-child {
+    margin-right: 0;
+}
+
+.home-sci a {
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 40px;
+    height: 40px;
+    margin-top: 410px;
+    background: transparent;
+    font-size: 25px;
+    color: #94a3b8;
+    text-decoration: none;
+    z-index: 1;
+    overflow: hidden;
+}
+
+.subheader {
+    /* display: flex; */
+    position: relative;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    left:49%;
+    width: 41%; 
+    z-index: 3;
+    /* border: 2px solid white; */
+    padding: 35px 0 66px 0;
+}
+
+
+.subheader .paragraph {
+    font-size: 16px;
+    line-height: 26px;
+    top: 30px;
+    position: relative; 
+    font-family: 'Applied Sans Pro';
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    line-height: 20px;
+    color: #94a3b8;
+    margin-bottom: 25px; /* Gap between items */
+    display: block; /* Display items inline */
+}
+
+.subheader .intro .paragraph:last-child {
+    margin-bottom: 150px; /* Adjust this value as needed */
+}
+
+/* Projects */
+
+.project-section {
+    margin-top: 75px; /* Adjust as needed */
+}
+
+.project {
+    display: flex;
+    align-items: center;
+    margin-bottom: 30px; /* Adjust as needed */
+}
+
+.project-thumbnail {
+    width: 30%;
+    height: 75px;
+    margin-right: 20px; /* Adjust as needed */
+    object-fit: cover;
+}
+
+.project-details h4 {
+    font-size: 20px;
+    color: #E2E8F0; /* Adjust as needed */
+    margin-bottom: 10px; /* Adjust as needed */
+}
+
+.project-details p {
+    font-size: 16px;
+    color: #94a3b8; /* Adjust as needed */
+}
+
+.shiny-tag {
+    display: inline-block;
+    background-color: #122e42;
+    border-radius: 15px; /* This will give the rectangle rounded corners */
+    padding: 5px 10px; /* Adjust as needed for padding around the text */
+    color: #00FFAA; /* Neon color for the text */
+    font-size: 14px; /* Adjust as needed */
+    margin-top: -5px; /* Space between the description and the tag */
+}
+
+.third-project .shiny-tag{
+    margin-bottom: 75px;
+}
+
+
+.subheader .schooling {
+    margin-bottom: 50px;
+}
+.subheader .education {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-family: 'Applied Sans Pro';
+}
+
+.subheader .education .year-school {
+    display: flex;
+    align-items: center;
+    
+    margin-bottom: 0px;
+}
+
+.subheader .education .year {
+    color: #94a3b8;
+    margin-right: 40px; /* Adjust this value for spacing between year and school */
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    color: #94a3b8;
+}
+
+.subheader .education .school {
+    color: #E2E8F0;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+}
+
+.subheader .education .location {
+    color: #94a3b8;
+    margin-top: -12px;;
+    margin-left: 107px;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+}
+
+.subheader .experience-section {
+    margin-bottom: 50px;
+}
+
+.subheader .experience {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-family: 'Applied Sans Pro';
+}
+
+.subheader .experience .year-company {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0px;
+}
+
+.subheader .experience .year {
+    color: #94a3b8;
+    margin-right: 90px; /* Adjust this value for spacing between year and company */
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 20px;
+    color: #94a3b8;
+}
+
+.subheader .experience .company {
+    color: #E2E8F0;
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+}
+
+.subheader .experience .position {
+    color: #94a3b8;
+    margin-top: -12px;
+    margin-left: 180px; /* Adjust this value for spacing between company and position */
+    font-size: 16px;
+    font-weight: 400;
+    letter-spacing: 0.5px;
+}
+
+.subheader .experience .description {
+    font-size: 16px;
+    line-height: 26px;
+    position: relative; 
+    font-family: 'Applied Sans Pro';
+    font-weight: 400;
+    letter-spacing: 0.5px;
+    line-height: 20px;
+    color: #94a3b8;
+    margin-bottom: 25px; /* Gap between items */
+    display: block; /* Display items inline */
+
+}
+.subheader .experience .feb {
+    margin-right: 50px;
+}
+
+.subheader .experience .dec {
+    margin-right: 15px;
+
+}
+
+.subheader .experience .sept {
+    margin-right: 40px;
+
+}
+
+.subheader .experience .project {
+    margin-left: 183px;
+}
+.subheader .experience .data {margin-left: 185px;}
+.subheader .experience .res {margin-left: 182px;}
+
+
+ 
+@keyframes rotate {
+    from {
+        transform: rotate(0deg);
+    }
+
+    50% {
+        scale: 1 1.2;
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
