@@ -11,7 +11,7 @@ body {
 #blob {
     height: 700px;
     aspect-ratio: 1;
-    position: absolute;
+    position: fixed;
     left: 50%;
     top: 50%;
 
