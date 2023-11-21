@@ -3,10 +3,11 @@ html {
 }
 
 body {
-    background-color: #0f172a;
-    height: 100vh;
-    width: 100vw;  
+  background-color: #0f172a;
+  height: 100vh;
+  width: 100vw;  
 }
+
 
 #blob {
     height: 700px;
@@ -46,7 +47,7 @@ body {
     align-items: center;
     height: 100vh; /* Ensures the header spans the full height of the viewport */
     left: 17.8%;
-    width: 41%; 
+    width: 35%; 
     z-index: 3; /* This ensures the header stays above other content */
     padding: 40px 0 66px 0;
     overflow: hidden; /* Prevents any overflow content from being visible */
@@ -160,7 +161,7 @@ body {
     width: 41%; 
     z-index: 3;
     /* border: 2px solid white; */
-    padding: 35px 0 66px 0;
+    padding: 50px 0 10px 7%;
 }
 
 
