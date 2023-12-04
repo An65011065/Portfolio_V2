@@ -203,7 +203,8 @@ body {
 }
 
 .custom-link {
-    color: #E2E8F0; /* Replace 'your-desired-color' with the color you want */
+    transition: all 0.3s ease-in-out;
+    color: #E2E8F0; 
     text-decoration: none; /* This removes the default underline on links */
 }
 
@@ -214,24 +215,14 @@ body {
     margin-bottom: 10px; /* Adjust as needed */
 }
 
-.project-details h4:before {
-    content: '';
-    background: #54b3d6;
-    display: block;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 3px;
-    transition: all 0.3s ease-in-out;
-}
 .project-details h4:hover {
-    background-position: 0;
+    color: #54b3d6;
 }
 
-.project-details h4:hover::before {
-    width: 75%;
+.custom-link:hover {
+    color: #54b3d6; /* Desired hover color */
 }
+
 
 .project-details p {
     font-size: 16px;
