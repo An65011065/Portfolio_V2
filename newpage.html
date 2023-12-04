@@ -1,0 +1,247 @@
+<!-- CURRENT STATUS: -->
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width" />
+  <title>Lab 10: Snow Globe</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gl-matrix/2.8.1/gl-matrix-min.js"></script>
+</head>
+
+<body>
+  <script type="text/javascript" src="utils.js"></script>
+  <center>
+    <button id="animate-button" onclick="toggleAnimation()">animate</button>
+    <label>
+      <input type="checkbox" id="windforce-checkbox" onchange="toggleWindForce()">
+      Wind Force
+    </label>
+  </center>
+  <hr />
+  <div style="width: 100%; position: relative">
+    <canvas id="animation-canvas" style="width: inherit"></canvas>
+    <img id="snow" src="snow.png" hidden />
+    <img id="earth" src="earth.jpg" hidden />
+    <!-- from https://getwallpapers.com/wallpaper/full/b/3/6/189868.jpg -->
+    <img id="background" src="cabin.jpeg" hidden />
+  </div>
+  <script type="text/javascript">
+    let windForceEnabled = false;
+
+    // Function to toggle the wind force state
+    const toggleWindForce = () => {
+      let windForceCheckbox = document.getElementById("windforce-checkbox");
+      windForceEnabled = windForceCheckbox.checked;
+    };
+    
+    let draw;
+    window.onload = () => {
+    
+      // setup WebGL2 rendering context and the global state
+      const aspectRatio = 1.6;
+      let canvas = document.getElementById("animation-canvas");
+      canvas.width = window.innerWidth;
+      canvas.height = canvas.width / aspectRatio;
+      let gl = canvas.getContext("webgl2");
+      gl.disable(gl.DEPTH_TEST);
+      gl.clearColor(0, 0, 0, 1);
+      gl.enable(gl.BLEND);
+      gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+
+      // initialize position and velocity of particles
+      const dim = 3;
+      const nParticles = 1e4;
+      let position = new Float32Array(dim * nParticles);
+      let velocity = new Float32Array(dim * nParticles);
+      for (let i = 0; i < nParticles * dim; i++) {
+        position[i] = -1 + 2 * Math.random();
+        velocity[i] = -0.5 + Math.random();
+      }
+
+      const vertexShaderSource = `
+        attribute vec3 a_Position;
+        attribute vec3 a_Velocity;
+
+        varying vec3 v_Position;
+        varying vec3 v_Velocity;
+
+        uniform mat4 u_ViewMatrix;
+        uniform mat4 u_ProjectionMatrix;
+
+        uniform vec3 u_MousePosition;
+        uniform bool u_WindForceEnabled;
+
+        float mass = 3e-6; // kg
+        float dt = 5e-4; // s
+        float area = 2.83e-5; // m^2
+        float rho = 1.022; // kg/m^3
+        float Cd = 0.5;
+
+        void main() {
+          gl_Position = u_ProjectionMatrix * u_ViewMatrix * vec4(a_Position, 1.0);
+          gl_PointSize = 5.0 / gl_Position.w;
+
+          // PART 3A: calculate v_Position and v_Velocity using gravity and drag forces
+          
+          vec3 gravity = vec3(0, -9.81, 0);
+          
+          float magnitudeVelocity = length(a_Velocity);
+          vec3 totalForce = (mass * gravity) - (rho * Cd * area * magnitudeVelocity * a_Velocity) / (2.0);
+          if (u_WindForceEnabled){
+            vec3 r = u_MousePosition - a_Position;
+            float alpha = 1e-4;
+            vec3 windForce = alpha * r / pow(length(r), 3.0);
+          
+            totalForce +=  windForce;
+          } 
+            
+          
+
+          vec3 acceleration = totalForce / mass;
+          
+          v_Velocity = a_Velocity + dt * acceleration;
+          v_Position = vec3(a_Position) + dt * a_Velocity;
+        
+          
+          // PART 3B: respawn to the top of the domain when v_Position.y < -1.
+          if (v_Position.y < -1.0){
+            v_Position.y = 1.0;
+          }
+
+          // PART 3C: make the snow accumulate on a sphere with radius 0.2 centered at (0, 0, 0)
+          float distancefromsphere= length(v_Position);
+          if (distancefromsphere <= 0.2){
+          v_Velocity = vec3(0,0,0);
+          } 
+
+        }`;
+
+      const fragmentShaderSource = `
+        precision highp float;
+        uniform sampler2D tex_Snowflake;
+        void main() {
+          // PART 1: use the snowflake texture to determine the fragment color
+          //gl_FragColor = vec4(1, 1, 1, 0.5);
+          gl_FragColor = texture2D(tex_Snowflake, gl_PointCoord);
+        }`;
+
+      let varyings = ["v_Position", "v_Velocity"];
+      let program = compileProgram(gl, vertexShaderSource, fragmentShaderSource, varyings);
+      let u_MousePosition = gl.getUniformLocation(program, "u_MousePosition");
+      let u_WindForceEnabled = gl.getUniformLocation(program, "u_WindForceEnabled");
+
+      setupTexture(gl, program, "snow", gl.RGBA, "tex_Snowflake", 0);
+
+      // create buffers for initial data
+      let positionBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, position, gl.STATIC_DRAW);
+
+      let velocityBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, velocityBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, velocity, gl.STATIC_DRAW);
+      
+
+
+      // enable attributes
+      let a_Position = gl.getAttribLocation(program, "a_Position");
+      gl.enableVertexAttribArray(a_Position);
+
+      let a_Velocity = gl.getAttribLocation(program, "a_Velocity");
+      gl.enableVertexAttribArray(a_Velocity);
+
+      // set up view and projection matrices and write to program uniforms
+      let u_ProjectionMatrix = gl.getUniformLocation(program, "u_ProjectionMatrix");
+      let u_ViewMatrix = gl.getUniformLocation(program, "u_ViewMatrix");
+
+      let projectionMatrix = mat4.create();
+      const fov = Math.PI / 4.0;
+      mat4.perspective(projectionMatrix, fov, aspectRatio, 1e-3, 1000);
+
+      const eye = vec3.fromValues(0, 0, 1);
+      const center = vec3.fromValues(0, 0, 0);
+      const up = vec3.fromValues(0, 1, 0);
+      const viewMatrix = mat4.lookAt(mat4.create(), eye, center, up);
+      gl.uniformMatrix4fv(u_ProjectionMatrix, false, projectionMatrix);
+      gl.uniformMatrix4fv(u_ViewMatrix, false, viewMatrix);
+
+      // PART 2A: setup buffers to capture pNext and vNext
+      let pNext = gl.createBuffer();
+      let vNext = gl.createBuffer();
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, pNext);
+      gl.bufferData(gl.ARRAY_BUFFER, 3 * 4 * nParticles, gl.DYNAMIC_DRAW);
+
+      gl.bindBuffer(gl.ARRAY_BUFFER, vNext);
+      gl.bufferData(gl.ARRAY_BUFFER, 3 * 4 * nParticles, gl.DYNAMIC_DRAW);
+
+      // and create transform feedback object
+      let feedback = gl.createTransformFeedback();
+      // draw function called by animateParticles()
+      draw = () => {
+        gl.clear(gl.DEPTH_BUFFER_BIT | gl.COLOR_BUFFER_BIT);
+        gl.useProgram(program);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+        gl.vertexAttribPointer(a_Position, 3, gl.FLOAT, false, 0, 0);
+
+        gl.bindBuffer(gl.ARRAY_BUFFER, velocityBuffer);
+        gl.vertexAttribPointer(a_Velocity, 3, gl.FLOAT, false, 0, 0);
+
+        // PART 2B: bind pNext and vNext to transform feedback object
+        gl.bindTransformFeedback(gl.TRANSFORM_FEEDBACK, feedback);
+        gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 0, pNext);
+        gl.bindBufferBase(gl.TRANSFORM_FEEDBACK_BUFFER, 1, vNext);
+
+
+        // and wrap call to gl.drawArrays within
+        gl.beginTransformFeedback(gl.POINTS);
+        // gl.beginTransformFeedback and gl.endTransformFeedback
+
+        gl.uniform1i(u_WindForceEnabled, windForceEnabled ? 1 : 0);
+        gl.drawArrays(gl.POINTS, 0, nParticles);
+
+        gl.endTransformFeedback();
+        // PART 2C: swap buffers
+        [pNext, positionBuffer] = [positionBuffer, pNext];
+        [vNext, velocityBuffer] = [velocityBuffer, vNext];
+
+      };
+
+      canvas.addEventListener('mousemove', (event) => {
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        // Convert to world coordinates and pass to the shader
+        const mouseWorldX = (x / canvas.width) * 2 - 1; // Normalize X to [-1, 1]
+        const mouseWorldY = 1 - (y / canvas.height) * 2; // Normalize Y to [-1, 1] and flip because canvas y is upside down
+        // Pass the normalized coordinates to the shader as a uniform
+        gl.uniform3f(u_MousePosition, mouseWorldX, mouseWorldY, 0.0); // Assuming mouse is at z = 0 in world space
+    });
+
+      draw();
+    }; // end of window.onload
+
+    // callbacks for starting or stopping the animation
+    let requestId;
+    const animateParticles = () => {
+      draw();
+      requestId = requestAnimationFrame(animateParticles);
+    };
+    const toggleAnimation = () => {
+      let button = document.getElementById("animate-button");
+      if (!requestId) {
+        button.innerHTML = "pause";
+        animateParticles();
+      } else {
+        button.innerHTML = "animate";
+        cancelAnimationFrame(requestId);
+        requestId = undefined;
+      }
+    };
+  </script>
+</body>
+
+</html>

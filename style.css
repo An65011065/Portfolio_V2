@@ -49,7 +49,7 @@ body {
     left: 17.8%;
     width: 35%; 
     z-index: 3; /* This ensures the header stays above other content */
-    padding: 40px 0 66px 0;
+    padding: 45px 0 66px 0;
     overflow: hidden; /* Prevents any overflow content from being visible */
 }
 
@@ -200,6 +200,11 @@ body {
     height: 75px;
     margin-right: 20px; /* Adjust as needed */
     object-fit: cover;
+}
+
+.custom-link {
+    color: #E2E8F0; /* Replace 'your-desired-color' with the color you want */
+    text-decoration: none; /* This removes the default underline on links */
 }
 
 .project-details h4 {

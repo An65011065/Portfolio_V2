@@ -37,6 +37,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
+
+
 //
 
 exports.default = series(scssTask, jsTask, browserSyncServe, watchTask);
